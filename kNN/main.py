@@ -1,4 +1,4 @@
-import re
+import sys
 import numpy as np
 import math
 import copy
@@ -54,30 +54,12 @@ print("Data normalized.")
 # Go through all validation data points
 correct = 0
 incorrect = 0
+k = int(sys.argv[1])
+verbose = False
 for index, data_point in enumerate(normalized_val_data):
-  # ==================================================================
-  # # 38% accuracy method:
-  # k = 5
-  # # Get all the distances between the new data point and the test data
-  # distances = np.linalg.norm(normalized_data - data_point, axis=1)
-  # # Find the nearest neighbours and get the labels
-  # nearest_neighbor_ids = distances.argsort()[:k]
-  # nearest_neighbor_labels = [labels[id] for id in nearest_neighbor_ids]
-  # # Calculate percentage
-  # if max(nearest_neighbor_labels) == validation_labels[index]: 
-  #   correct += 1
-  # else: 
-  #   incorrect += 1
-  # ==================================================================
-  
-
-  # ==================================================================
-  # 37% accuracy method:
-  data_point = normalized_val_data[index]
-  k = 5
   
   # Get all the distances
-  distances = [math.dist(reference_point, data_point) for reference_point in normalized_data]
+  distances = [math.dist(reference_point, normalized_val_data[index]) for reference_point in normalized_data]
   
   # Sort the distances but keep the original index
   org_distance = copy.deepcopy(distances)
@@ -89,16 +71,16 @@ for index, data_point in enumerate(normalized_val_data):
   # Get the labels for the specific days
   nearest_neighbor_labels = [labels[id] for id in nearest_neighbor_ids]
 
-  print(f"Validation data point number: {index}")
-  [print(f"Neighbor distance: {round(org_distance[id], 3)} with label: {labels[id]} vs ground truth: {validation_labels[index]}")
-          for id in nearest_neighbor_ids]
-  print(f"Most common neighbor: {max(nearest_neighbor_labels)}\n")
+  if verbose:
+    print(f"Validation data point number: {index}")
+    [print(f"Neighbor distance: {round(org_distance[id], 3)} with label: {labels[id]} vs ground truth: {validation_labels[index]}")
+            for id in nearest_neighbor_ids]
+    print(f"Most common neighbor: {max(nearest_neighbor_labels)}\n")
   
   # Keep track of correct estimations
   if max(nearest_neighbor_labels) == validation_labels[index]: 
     correct += 1
   else: 
     incorrect += 1
-  # ==================================================================
 
-print(f"Accuracy: {(correct / len(normalized_val_data) * 100)}%")
+print(f"Accuracy: {(correct / len(normalized_val_data) * 100)}% with k: {k}")
