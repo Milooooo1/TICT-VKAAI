@@ -1,5 +1,7 @@
+import re
 import numpy as np
 import math
+import copy
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 
@@ -44,8 +46,8 @@ for label in validation_dates:
     validation_labels.append("winter")
 
 # Normalize validation and test data
-normalized_data = preprocessing.normalize(np.array(data))
-normalized_val_data = preprocessing.normalize(np.array(validation_data))
+normalized_data = np.array([[((i - min(day)) / (max(day) - min(day))) for i in day] for day in data])
+normalized_val_data = np.array([[((i - min(day)) / (max(day) - min(day))) for i in day] for day in validation_data])
 
 print("Data normalized.")
 
@@ -53,18 +55,50 @@ print("Data normalized.")
 correct = 0
 incorrect = 0
 for index, data_point in enumerate(normalized_val_data):
+  # ==================================================================
+  # # 38% accuracy method:
+  # k = 5
+  # # Get all the distances between the new data point and the test data
+  # distances = np.linalg.norm(normalized_data - data_point, axis=1)
+  # # Find the nearest neighbours and get the labels
+  # nearest_neighbor_ids = distances.argsort()[:k]
+  # nearest_neighbor_labels = [labels[id] for id in nearest_neighbor_ids]
+  # # Calculate percentage
+  # if max(nearest_neighbor_labels) == validation_labels[index]: 
+  #   correct += 1
+  # else: 
+  #   incorrect += 1
+  # ==================================================================
+  
+
+  # ==================================================================
+  # 37% accuracy method:
   data_point = normalized_val_data[index]
-
-  # Get all the distances between the new data point and the test data
-  distances = np.linalg.norm(normalized_data - data_point, axis=1)
-
-  # Find the nearest neighbours and get the labels
   k = 5
-  nearest_neighbor_ids = distances.argsort()[:k]
+  
+  # Get all the distances
+  distances = [math.dist(reference_point, data_point) for reference_point in normalized_data]
+  
+  # Sort the distances but keep the original index
+  org_distance = copy.deepcopy(distances)
+  distances.sort()
+  # Get only the k shortest distances
+  nearest_neighbor_distances = distances[:k]
+  # Get the indexes of these distanced based on their original index before sorting
+  nearest_neighbor_ids = [org_distance.index(dist) for dist in nearest_neighbor_distances]
+  # Get the labels for the specific days
   nearest_neighbor_labels = [labels[id] for id in nearest_neighbor_ids]
+
+  print(f"Validation data point number: {index}")
+  [print(f"Neighbor distance: {round(org_distance[id], 3)} with label: {labels[id]} vs ground truth: {validation_labels[index]}")
+          for id in nearest_neighbor_ids]
+  print(f"Most common neighbor: {max(nearest_neighbor_labels)}\n")
+  
+  # Keep track of correct estimations
   if max(nearest_neighbor_labels) == validation_labels[index]: 
     correct += 1
   else: 
     incorrect += 1
+  # ==================================================================
 
 print(f"Accuracy: {(correct / len(normalized_val_data) * 100)}%")
