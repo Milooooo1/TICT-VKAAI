@@ -1,8 +1,6 @@
-import sys
 import numpy as np
 import math
 import copy
-import matplotlib.pyplot as plt
 import argparse
 import collections
 
@@ -53,8 +51,6 @@ def loadNormalizedData():
   # Normalize validation and test data
   normalized_test_data = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in test_data])
   normalized_val_data = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in validation_data])
-  print(normalized_test_data)
-  print(normalized_val_data)
 
   return normalized_val_data, validation_labels, normalized_test_data, test_labels
 
@@ -93,14 +89,16 @@ def estimateDataPoint(k, ground_truth, data_point, normalized_data, data_labels,
     return False
 
 def getKNN(k, normalized_val_data, validation_labels, normalized_data, labels, verbose = False):
-  # Go through all validation data points
   correct = 0
   incorrect = 0
+  # Go through all validation data points
   for index, data_point in enumerate(normalized_val_data):
     ground_truth = validation_labels[index]
-    if verbose: print(f"Data point number: {index}")
-    val = estimateDataPoint(k, ground_truth, data_point, normalized_data, labels, verbose)
-    if val:
+    
+    if verbose: 
+      print(f"Data point number: {index}")
+
+    if estimateDataPoint(k, ground_truth, data_point, normalized_data, labels, verbose):
       correct += 1
     else:
       incorrect += 1
