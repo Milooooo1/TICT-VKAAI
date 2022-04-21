@@ -50,7 +50,7 @@ def estimateDataPoint(k, ground_truth, data_point, normalized_data, data_labels,
   distances.sort()
   # Get only the k shortest distances
   nearest_neighbor_distances = distances[:k]
-  # Get the indexes of these distanced based on their original index before sorting
+  # Get the indexes of these distances based on their original index before sorting
   nearest_neighbor_ids = [org_distance.index(dist) for dist in nearest_neighbor_distances]
   # Get the labels for the specific days
   nearest_neighbor_labels = [data_labels[id] for id in nearest_neighbor_ids]
@@ -95,7 +95,7 @@ def getKNN(k, normalized_val_data, validation_labels, normalized_data, labels, v
 
 parser = argparse.ArgumentParser(description='kNearestNeighbors')
 parser.add_argument("-k", "--kNN", required=True, type=int, help="amount of neighbors to look at")
-parser.add_argument("-v", "--verbose", required=False, default=False, type=bool, help="enable or disable debug printing")
+parser.add_argument("-v", "--verbose", required=False, default=False, action='store_true', help="enable or disable debug printing")
 
 args = parser.parse_args()
 
