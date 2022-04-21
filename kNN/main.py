@@ -64,7 +64,9 @@ def estimateDataPoint(k, ground_truth, data_point, normalized_data, data_labels,
       # Call same function again only with a lower K value
       return estimateDataPoint(k - 1, ground_truth, data_point, normalized_data, data_labels, verbose)
 
+  # print debug information
   if verbose:
+    print(f" with k: {k}")
     [print(f"Neighbor distance: {round(org_distance[id], 3)} with label: {data_labels[id]} vs ground truth: {ground_truth}")
             for id in nearest_neighbor_ids]
     print(f"Most common neighbor: {occurancies_dict.most_common()[0][0]} in {occurancies_dict}\n")
@@ -82,8 +84,9 @@ def getKNN(k, normalized_val_data, validation_labels, normalized_data, labels, v
   for index, data_point in enumerate(normalized_val_data):
     ground_truth = validation_labels[index]
     
+    # print debug information
     if verbose: 
-      print(f"Data point number: {index}")
+      print(f"Data point number: {index}", end="")
 
     if estimateDataPoint(k, ground_truth, data_point, normalized_data, labels, verbose):
       correct += 1
