@@ -5,7 +5,7 @@ import argparse
 import collections
 
 def loadNormalizedData():
-  test_data = np.genfromtxt("dataset1.csv", delimiter=";", usecols=[1,2,3,4,5,6,7], 
+  test_data = np.genfromtxt("dataset1.csv", delimiter=";", usecols=[2,5,6,7], 
                       converters={5: lambda s: 0 if s == b"-1" else float(s), 
                                   7: lambda s: 0 if s == b"-1" else float(s)}
                       )
@@ -25,7 +25,7 @@ def loadNormalizedData():
     else: # from 01-12 to end of year
       test_labels.append("winter")
 
-  validation_data = np.genfromtxt("validation1.csv", delimiter=";", usecols=[1,2,3,4,5,6,7], 
+  validation_data = np.genfromtxt("validation1.csv", delimiter=";", usecols=[2,5,6,7], 
                       converters={5: lambda s: 0 if s == b"-1" else float(s), 
                                   7: lambda s: 0 if s == b"-1" else float(s)}
                       )
@@ -56,8 +56,9 @@ def loadNormalizedData():
 
 def estimateDataPoint(k, ground_truth, data_point, normalized_data, data_labels, verbose):
   # Get all the distances
-  distances = [math.dist(reference_point, data_point) for reference_point in normalized_data]
-  
+  # distances = [math.dist(reference_point, data_point) for reference_point in normalized_data]
+  distances = [np.linalg.norm(reference_point - data_point) for reference_point in normalized_data]
+
   # Sort the distances but keep the original index
   org_distance = copy.deepcopy(distances)
   distances.sort()
@@ -80,10 +81,10 @@ def estimateDataPoint(k, ground_truth, data_point, normalized_data, data_labels,
   if verbose:
     [print(f"Neighbor distance: {round(org_distance[id], 3)} with label: {data_labels[id]} vs ground truth: {ground_truth}")
             for id in nearest_neighbor_ids]
-    print(f"Most common neighbor: {max(nearest_neighbor_labels)} in {occurancies_dict}\n")
+    print(f"Most common neighbor: {occurancies_dict.most_common()[0][0]} in {occurancies_dict}\n")
   
   # Keep track of correct estimations
-  if max(nearest_neighbor_labels) == ground_truth: 
+  if occurancies_dict.most_common()[0][0] == ground_truth: 
     return True
   else: 
     return False
