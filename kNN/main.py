@@ -4,53 +4,39 @@ import copy
 import argparse
 import collections
 
-def loadNormalizedData():
-  test_data = np.genfromtxt("dataset1.csv", delimiter=";", usecols=[2,5,6,7], 
+def importCSVFile(filename):
+  data = np.genfromtxt(filename, delimiter=";", usecols=[2,5,6,7], 
                       converters={5: lambda s: 0 if s == b"-1" else float(s), 
                                   7: lambda s: 0 if s == b"-1" else float(s)}
                       )
 
-  dates = np.genfromtxt("dataset1.csv", delimiter=";", usecols=[0])
+  dates = np.genfromtxt(filename, delimiter=";", usecols=[0])
 
-  test_labels = []
+  labels = []
   for label in dates:
     if label < 20000301:
-      test_labels.append("winter")
+      labels.append("winter")
     elif 20000301 <= label < 20000601:
-      test_labels.append("lente")
+      labels.append("lente")
     elif 20000601 <= label < 20000901:
-      test_labels.append("zomer")
+      labels.append("zomer")
     elif 20000901 <= label < 20001201:
-      test_labels.append("herfst")
+      labels.append("herfst")
     else: # from 01-12 to end of year
-      test_labels.append("winter")
+      labels.append("winter")
 
-  validation_data = np.genfromtxt("validation1.csv", delimiter=";", usecols=[2,5,6,7], 
-                      converters={5: lambda s: 0 if s == b"-1" else float(s), 
-                                  7: lambda s: 0 if s == b"-1" else float(s)}
-                      )
+  return labels, data
 
-  validation_dates = np.genfromtxt("validation1.csv", delimiter=";", usecols=[0])
-
-  validation_labels = []
-  for label in validation_dates:
-    if label < 20000301:
-      validation_labels.append("winter")
-    elif 20000301 <= label < 20000601:
-      validation_labels.append("lente")
-    elif 20000601 <= label < 20000901:
-      validation_labels.append("zomer")
-    elif 20000901 <= label < 20001201:
-      validation_labels.append("herfst")
-    else: # from 01-12 to end of year
-      validation_labels.append("winter")
+def loadNormalizedData():
+  test_labels, test_data = importCSVFile("dataset1.csv")
+  validation_labels, validation_data = importCSVFile("validation1.csv")
 
   norm_max = max([np.amax(test_data), np.amax(validation_data)])
   norm_min = min([np.amin(test_data), np.amin(validation_data)])
 
   # Normalize validation and test data
   normalized_test_data = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in test_data])
-  normalized_val_data = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in validation_data])
+  normalized_val_data  = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in validation_data])
 
   return normalized_val_data, validation_labels, normalized_test_data, test_labels
 
