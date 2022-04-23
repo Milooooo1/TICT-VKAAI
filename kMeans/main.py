@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import argparse
+import collections
 import matplotlib.pyplot as plt
 import tqdm
 
@@ -108,7 +109,6 @@ def getCentroids(norm_test_data, cluster_dict, iteration = 0):
     # Caculate the clusters again based on the new centroids
     return getCentroids(norm_test_data, new_cluster_dict, iteration+1)
 
-#TODO doe dit spelletje 5x opnieuw aangezien we beginnen met random punten. Pak als resultaat de beste iteratie.
 def getBestCentroids(norm_test_data, num_clusters): 
     global num_iterations
 
@@ -174,7 +174,35 @@ def createScreePlot(norm_test_data):
     plt.ylabel("Intra cluster distance")
     plt.savefig("screeplot.png")
 
+def labelCentroids(data, labels, centroids):
 
+    cluster_dict = {index : [centroid, []] for index, centroid in enumerate(centroids)}
+    for index, data_point in enumerate(data):
+        # Get distance of the data_point to all the centroids
+        distances = [np.linalg.norm(centroid - data_point) for centroid in centroids]
+
+        # Add the datapoint to the list of the centroid with the smallest distance
+        cluster_dict[distances.index(min(distances))][1].append(labels[index])
+    
+    res = []
+    for cluster in cluster_dict.keys():
+        res.append((cluster_dict[cluster][0], collections.Counter(cluster_dict[cluster][1]).most_common()[0][0]))
+        # print(f"Cluster {cluster} with most common label: {collections.Counter(cluster_dict[cluster][1]).most_common()[0]}")
+    
+    return res
+
+def measureAccuracy(val_data, val_labels, labeled_centroids):
+    correct = 0
+    incorrect = 0
+    for index, val_point in enumerate(val_data):
+        distances = [np.linalg.norm(centroid[0] - val_point) for centroid in labeled_centroids]
+        closest_centroid = labeled_centroids[distances.index(min(distances))]
+        if closest_centroid[1] == val_labels[index]:
+            correct += 1
+        else:
+            incorrect += 1
+    
+    print(f"kMeans accuracy is {(correct / len(val_labels) * 100)}%")
 
 def main():
     random.seed(1)
@@ -182,17 +210,27 @@ def main():
     global num_iterations
 
     parser = argparse.ArgumentParser(description='kNearestNeighbors')
-    parser.add_argument("-i", "--iterations", required=True, type=int, help="amount of times find the best centroids")
-    parser.add_argument("-v", "--verbose", required=False, default=False, action='store_true', help="enable or disable debug printing")
+    parser.add_argument("-i", "--iterations", required=False, default=5, type=int, 
+                                             help="amount of times find the best centroids")
+    parser.add_argument("-v", "--verbose", required=False, default=False, 
+                        action='store_true', help="enable or disable debug printing")
+    parser.add_argument("-c", "--createScreePlot", required=False, default=False, 
+                        action='store_true', help="enable or disable scree plot creation")
+    parser.add_argument("-m", "--measureAccuract", required=False, default=True, 
+                        action='store_true', help="enable or disable kMeans accuracy measurement")
 
     args = parser.parse_args()
     verbose = args.verbose
     num_iterations = args.iterations
 
     norm_val_data, val_labels, norm_test_data, test_labels = loadNormalizedData()
-    createScreePlot(norm_test_data)
-    # centroids = getBestCentroids(norm_test_data, 4)
-    # [print(f"Centroid: {centroid}") for centroid in centroids]
+    # createScreePlot(norm_test_data)
+    # print("Screeplot saved to filesystem")
+    
+    centroids = getBestCentroids(norm_test_data, 5)
+    labeled_centroids = labelCentroids(norm_test_data, test_labels, centroids)
+    if verbose: [print(f"Centroid: {[str(round(i, 2)) for i in item[0]]} with label: {item[1]}") for item in labeled_centroids]; print()
+    measureAccuracy(norm_val_data, val_labels, labeled_centroids)
 
 if __name__ == '__main__':
     main()
