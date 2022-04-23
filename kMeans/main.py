@@ -62,6 +62,12 @@ def adjustCentroidToAvg(cluster_dict):
 
     # Go through every cluster
     for cluster_num in cluster_dict.keys():
+		
+        # If a centroid has no cluster we cannot average its position
+        if (len(cluster_dict[cluster_num][1]) == 0):
+            new_cluster_dict[cluster_num] = [cluster_dict[cluster_num][0], []]    
+            continue
+
         # Create an empty list the same size of a data_point
         cluster_point_average = [0] * len(cluster_dict[cluster_num][1][0])
         # For every cluster go through all cluster points
