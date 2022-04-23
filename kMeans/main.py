@@ -1,6 +1,8 @@
 import numpy as np
 import random
 import argparse
+import matplotlib.pyplot as plt
+import tqdm
 
 verbose = False
 num_iterations = 0
@@ -118,9 +120,9 @@ def getBestCentroids(norm_test_data, num_clusters):
 
             # Pick a random already existing point 
             # but avoid picking the same point twice
-            pick = random.randint(0, len(norm_test_data))
+            pick = random.randint(0, len(norm_test_data)-1)
             while pick == prev:
-                pick = random.randint(0, len(norm_test_data))
+                pick = random.randint(0, len(norm_test_data)-1)
                 prev = pick
             
             # Add centroids to list
@@ -131,16 +133,48 @@ def getBestCentroids(norm_test_data, num_clusters):
         cluster_dict = {index : [centroid, []] for index, centroid in enumerate(centroids)}
         results.append(getCentroids(norm_test_data, cluster_dict))
 
-    best_centroids = []
-    # if verbose:
-        # print(f"After {num_iterations} iterations the best centroids are:")
-        # [print(f"\tFor cluster {index}: ") for index, centroid in results]
+    return results[0] # Right now im returning the first result because I don't know how to determine the best iteration
 
-    return cluster_dict
+def createScreePlot(norm_test_data):
+    testedKparams = range(1, 15)
 
-def createScreePlot():
-    # kwadrateer de afstand tussen alle punten van het cluster ten opzichte van de centroid = aggregraat interclusterdistance 
-    pass
+    screePlotPoints = []
+    print("Generating screePlot")
+    for k in tqdm.tqdm(testedKparams):
+        centroids = getBestCentroids(norm_test_data, k)
+        # [print(f"Cluster {index} with centroid: {[str(round(i,2)) for i in centroid]}") for index, centroid in enumerate(centroids)]
+
+        # Initialise a cluster dict, the cluster index as the key and a value 
+        # with a mutable list of the centroid and the list of its datapoint
+        cluster_dict = {index : [centroid, []] for index, centroid in enumerate(centroids)}
+        for data_point in norm_test_data:
+            # Get distance of the data_point to all the centroids
+            distances = [np.linalg.norm(centroid - data_point) for centroid in centroids]
+        
+            # Add the datapoint to the list of the centroid with the smallest distance
+            cluster_dict[distances.index(min(distances))][1].append(data_point)
+   
+        # Calculate the intra cluster distance
+        # This is the distance between the centroid and all of its data_points
+        intraclusterdist = []
+        for index, centroid in enumerate(centroids):
+            cluster_total = 0
+            for cluster_point in cluster_dict[index][1]:
+                cluster_total += pow(np.linalg.norm(centroid - cluster_point), 2)
+            intraclusterdist.append(cluster_total)
+
+            # print(f"Cluster {index} has a total intra cluster dist of: {cluster_total}")
+        # print(f"With a total distance of {sum(intraclusterdist)}")
+        screePlotPoints.append(sum(intraclusterdist))
+
+    plt.plot(testedKparams, screePlotPoints)
+    plt.title("Screeplot")
+    plt.xlabel("Amount of clusters")
+    plt.xticks(np.arange(min(testedKparams), max(testedKparams)+1, 1.0))
+    plt.ylabel("Intra cluster distance")
+    plt.savefig("screeplot.png")
+
+
 
 def main():
     random.seed(1)
@@ -148,7 +182,7 @@ def main():
     global num_iterations
 
     parser = argparse.ArgumentParser(description='kNearestNeighbors')
-    parser.add_argument("-i", "--iterations", required=True, type=int, help="amount of times to adjust the centroids")
+    parser.add_argument("-i", "--iterations", required=True, type=int, help="amount of times find the best centroids")
     parser.add_argument("-v", "--verbose", required=False, default=False, action='store_true', help="enable or disable debug printing")
 
     args = parser.parse_args()
@@ -156,7 +190,8 @@ def main():
     num_iterations = args.iterations
 
     norm_val_data, val_labels, norm_test_data, test_labels = loadNormalizedData()
-    centroids = getBestCentroids(norm_test_data, 4)
+    createScreePlot(norm_test_data)
+    # centroids = getBestCentroids(norm_test_data, 4)
     # [print(f"Centroid: {centroid}") for centroid in centroids]
 
 if __name__ == '__main__':
