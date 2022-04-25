@@ -9,56 +9,59 @@ verbose = False
 num_iterations = 0
 
 def importCSVFile(filename, year):
+    data = np.genfromtxt(filename, delimiter=";", usecols=[1,2,3,4,5,6,7], 
   data = np.genfromtxt(filename, delimiter=";", usecols=[1,2,3,4,5,6,7], 
+    data = np.genfromtxt(filename, delimiter=";", usecols=[1,2,3,4,5,6,7], 
+                          converters={5: lambda s: 0 if s == b"-1" else float(s), 
                       converters={5: lambda s: 0 if s == b"-1" else float(s), 
-                                  7: lambda s: 0 if s == b"-1" else float(s)}
-                      )
+                          converters={5: lambda s: 0 if s == b"-1" else float(s), 
+                                      7: lambda s: 0 if s == b"-1" else float(s)}
+                          )
 
-  dates = np.genfromtxt(filename, delimiter=";", usecols=[0])
+    dates = np.genfromtxt(filename, delimiter=";", usecols=[0])
 
-  if year == 2000:
-    labels = []
-    for label in dates:
-      if label < 20000301:
-        labels.append("winter")
-      elif 20000301 <= label < 20000601:
-        labels.append("lente")
-      elif 20000601 <= label < 20000901:
-        labels.append("zomer")
-      elif 20000901 <= label < 20001201:
-        labels.append("herfst")
-      else: # from 01-12 to end of year
-        labels.append("winter")
+    if year == 2000:
+        labels = []
+        for label in dates:
+            if label < 20000301:
+                labels.append("winter")
+            elif 20000301 <= label < 20000601:
+                labels.append("lente")
+            elif 20000601 <= label < 20000901:
+                labels.append("zomer")
+            elif 20000901 <= label < 20001201:
+                labels.append("herfst")
+            else: # from 01-12 to end of year
+                labels.append("winter")
         
-  else:
-    labels = []
-    for label in dates:
-      if label < 20010301:
-        labels.append("winter")
-      elif 20010301 <= label < 20010601:
-        labels.append("lente")
-      elif 20010601 <= label < 20010901:
-        labels.append("zomer")
-      elif 20010901 <= label < 20011201:
-        labels.append("herfst")
-      else: # from 01-12 to end of year
-        labels.append("winter")
+    else:
+        labels = []
+        for label in dates:
+            if label < 20010301:
+                labels.append("winter")
+            elif 20010301 <= label < 20010601:
+                labels.append("lente")
+            elif 20010601 <= label < 20010901:
+                labels.append("zomer")
+            elif 20010901 <= label < 20011201:
+                labels.append("herfst")
+            else: # from 01-12 to end of year
+                labels.append("winter")
 
-
-  return labels, data
+    return labels, data
 
 def loadNormalizedData():
-  test_labels, test_data = importCSVFile("dataset1.csv", 2000)
-  validation_labels, validation_data = importCSVFile("validation1.csv", 2001)
+    test_labels, test_data = importCSVFile("dataset1.csv", 2000)
+    validation_labels, validation_data = importCSVFile("validation1.csv", 2001)
 
-  norm_max = max([np.amax(test_data), np.amax(validation_data)])
-  norm_min = min([np.amin(test_data), np.amin(validation_data)])
+    norm_max = max([np.amax(test_data), np.amax(validation_data)])
+    norm_min = min([np.amin(test_data), np.amin(validation_data)])
 
-  # Normalize validation and test data
-  normalized_test_data = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in test_data])
-  normalized_val_data  = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in validation_data])
+    # Normalize validation and test data
+    normalized_test_data = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in test_data])
+    normalized_val_data  = np.array([[((i - norm_min) / (norm_max - norm_min)) for i in day] for day in validation_data])
 
-  return normalized_val_data, validation_labels, normalized_test_data, test_labels
+    return normalized_val_data, validation_labels, normalized_test_data, test_labels
 
 def adjustCentroidToAvg(cluster_dict):
     new_cluster_dict = {}
