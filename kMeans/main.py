@@ -144,7 +144,7 @@ def getBestCentroids(norm_test_data, num_clusters):
         
         iteration_distances.append(sum([cluster_dict[index] for index in cluster_dict.keys()]))
 
-    print(f"Best iteration is iteration: {iteration_distances.index(min(iteration_distances))} with a total distance of {min(iteration_distances)}")
+    if verbose: print(f"Best iteration is iteration: {iteration_distances.index(min(iteration_distances))} with a total distance of {min(iteration_distances)}")
     return results[iteration_distances.index(min(iteration_distances))]
 
 def createScreePlot(norm_test_data):
