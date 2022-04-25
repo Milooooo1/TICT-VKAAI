@@ -220,6 +220,8 @@ def main():
     parser = argparse.ArgumentParser(description='kNearestNeighbors')
     parser.add_argument("-i", "--iterations", required=False, default=5, type=int, 
                                              help="amount of times find the best centroids")
+    parser.add_argument("-k", "--clusters", required=False, default=3, type=int, 
+                                             help="amount of clusters to use when measuring")
     parser.add_argument("-v", "--verbose", required=False, default=False, 
                         action='store_true', help="enable or disable debug printing")
     parser.add_argument("-c", "--createScreePlot", required=False, default=False, 
@@ -238,7 +240,7 @@ def main():
         print("Screeplot saved to filesystem")
     
     if args.measureAccuracy:
-        centroids = getBestCentroids(norm_test_data, 3)
+        centroids = getBestCentroids(norm_test_data, args.clusters)
         labeled_centroids = labelCentroids(norm_test_data, test_labels, centroids)
         if verbose: print(); [print(f"Centroid: {[str(round(i, 2)) for i in item[0]]} with label: {item[1]}") for item in labeled_centroids]; print()
         measureAccuracy(norm_val_data, val_labels, labeled_centroids)
