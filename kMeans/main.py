@@ -10,10 +10,6 @@ num_iterations = 0
 
 def importCSVFile(filename, year):
     data = np.genfromtxt(filename, delimiter=";", usecols=[1,2,3,4,5,6,7], 
-  data = np.genfromtxt(filename, delimiter=";", usecols=[1,2,3,4,5,6,7], 
-    data = np.genfromtxt(filename, delimiter=";", usecols=[1,2,3,4,5,6,7], 
-                          converters={5: lambda s: 0 if s == b"-1" else float(s), 
-                      converters={5: lambda s: 0 if s == b"-1" else float(s), 
                           converters={5: lambda s: 0 if s == b"-1" else float(s), 
                                       7: lambda s: 0 if s == b"-1" else float(s)}
                           )
@@ -136,7 +132,20 @@ def getBestCentroids(norm_test_data, num_clusters):
         cluster_dict = {index : [centroid, []] for index, centroid in enumerate(centroids)}
         results.append(getCentroids(norm_test_data, cluster_dict))
 
-    return results[0] # Right now im returning the first result because I don't know how to determine the best iteration
+    # Calculate the best iteration by looking for the lowest total distance
+    iteration_distances = []
+    for iteration in results:
+
+        cluster_dict = {index : 0 for index in range(0, len(iteration))}  
+        for data_point in norm_test_data:
+            # Find the most near centroid and add that distance to the cluster total dict
+            distances = [np.linalg.norm(centroid - data_point) for centroid in iteration]
+            cluster_dict[distances.index(min(distances))] += min(distances)
+        
+        iteration_distances.append(sum([cluster_dict[index] for index in cluster_dict.keys()]))
+
+    print(f"Best iteration is iteration: {iteration_distances.index(min(iteration_distances))} with a total distance of {min(iteration_distances)}")
+    return results[iteration_distances.index(min(iteration_distances))]
 
 def createScreePlot(norm_test_data):
     testedKparams = range(1, 15)
@@ -145,7 +154,6 @@ def createScreePlot(norm_test_data):
     print("Generating screePlot")
     for k in tqdm.tqdm(testedKparams):
         centroids = getBestCentroids(norm_test_data, k)
-        # [print(f"Cluster {index} with centroid: {[str(round(i,2)) for i in centroid]}") for index, centroid in enumerate(centroids)]
 
         # Initialise a cluster dict, the cluster index as the key and a value 
         # with a mutable list of the centroid and the list of its datapoint
@@ -166,8 +174,6 @@ def createScreePlot(norm_test_data):
                 cluster_total += pow(np.linalg.norm(centroid - cluster_point), 2)
             intraclusterdist.append(cluster_total)
 
-            # print(f"Cluster {index} has a total intra cluster dist of: {cluster_total}")
-        # print(f"With a total distance of {sum(intraclusterdist)}")
         screePlotPoints.append(sum(intraclusterdist))
 
     plt.plot(testedKparams, screePlotPoints)
@@ -190,7 +196,6 @@ def labelCentroids(data, labels, centroids):
     res = []
     for cluster in cluster_dict.keys():
         res.append((cluster_dict[cluster][0], collections.Counter(cluster_dict[cluster][1]).most_common()[0][0]))
-        # print(f"Cluster {cluster} with most common label: {collections.Counter(cluster_dict[cluster][1]).most_common()[0]}")
     
     return res
 
@@ -208,7 +213,7 @@ def measureAccuracy(val_data, val_labels, labeled_centroids):
     print(f"kMeans accuracy is {(correct / len(val_labels) * 100)}%")
 
 def main():
-    random.seed(1)
+    random.seed(0)
     global verbose 
     global num_iterations
 
@@ -219,7 +224,7 @@ def main():
                         action='store_true', help="enable or disable debug printing")
     parser.add_argument("-c", "--createScreePlot", required=False, default=False, 
                         action='store_true', help="enable or disable scree plot creation")
-    parser.add_argument("-m", "--measureAccuract", required=False, default=True, 
+    parser.add_argument("-m", "--measureAccuracy", required=False, default=True, 
                         action='store_true', help="enable or disable kMeans accuracy measurement")
 
     args = parser.parse_args()
@@ -227,13 +232,16 @@ def main():
     num_iterations = args.iterations
 
     norm_val_data, val_labels, norm_test_data, test_labels = loadNormalizedData()
-    # createScreePlot(norm_test_data)
-    # print("Screeplot saved to filesystem")
     
-    centroids = getBestCentroids(norm_test_data, 5)
-    labeled_centroids = labelCentroids(norm_test_data, test_labels, centroids)
-    if verbose: [print(f"Centroid: {[str(round(i, 2)) for i in item[0]]} with label: {item[1]}") for item in labeled_centroids]; print()
-    measureAccuracy(norm_val_data, val_labels, labeled_centroids)
+    if args.createScreePlot:
+        createScreePlot(norm_test_data)
+        print("Screeplot saved to filesystem")
+    
+    if args.measureAccuracy:
+        centroids = getBestCentroids(norm_test_data, 3)
+        labeled_centroids = labelCentroids(norm_test_data, test_labels, centroids)
+        if verbose: print(); [print(f"Centroid: {[str(round(i, 2)) for i in item[0]]} with label: {item[1]}") for item in labeled_centroids]; print()
+        measureAccuracy(norm_val_data, val_labels, labeled_centroids)
 
 if __name__ == '__main__':
     main()
