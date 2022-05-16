@@ -1,10 +1,17 @@
 import numpy as np
+import random
 
 class Neuron:
     def __init__(self, weights, bias, less_than_or_equals = False):
         self.weights = weights
         self.bias = bias
+        self.delta = 0
         self.less_than_or_equals = less_than_or_equals
+
+    def update(self, delta, bias, weights):
+        self.bias = bias
+        self.delta = delta
+        self.weights = weights
 
     def classify(self, inputs):
         sum = 0
@@ -16,7 +23,24 @@ class Neuron:
         else:
             return 1 if sum >= self.bias else 0
 
+    def __str__(self):
+        return f"Neuron weights: {len(self.weights)}. Bias: {self.bias}"
+
+class NeuralNetwork:
+    def __init__(self, num_layers, layer_depths):
+        self.matrix = []
+        for i in range(0, num_layers):
+            # self.matrix.append([])
+            # for j in range(0, layer_depths):
+            self.matrix.append(Neuron([random.uniform(-1, 1) for j in range(layer_depths[i])], random.uniform(-1, 1)))
+        
+        print([str(i) for i in self.matrix])
+        pass
+
+
+
 def main():
+    random.seed(0)
 
     NOR_gate = Neuron([0.5, 0.5], 0.33, True)
     print("NOR gate:")
@@ -43,6 +67,7 @@ def main():
             carry = NAND_gate.classify([out1, out1])
             print(f"{x1}, {x2}, {carry}, {sum}")
 
+    NeuralNetwork(3, [2, 2, 2])
 
 if __name__ == "__main__":
     main()
