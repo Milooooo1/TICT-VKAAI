@@ -83,6 +83,7 @@ class NeuralNetwork:
             print(f"(2) D = {round(sigmoid(neuron.zj), 2)} * {round(ground_truth, 2)} - {round(neuron.output, 2)} = {round(neuron.delta, 2)}")
         
         # Backpropagate the previous layers
+        ## TODO: I THINK I AM USING THE WRONG DELTAS AND WEIGHTS
         print()
         tmp = len(self.matrix[1:-1])
         for index, layer in reversed(list(enumerate(self.matrix[1:-1]))):
@@ -96,8 +97,6 @@ class NeuralNetwork:
                         print("+ ", end="")
                 neuron.delta = sigmoid_grad(neuron.zj) * acc
                 print(f"= {round(sigmoid_grad(neuron.zj),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
-
-        # pass
     
     def train(self, inputs, outputs, lr = 0.01):
         
