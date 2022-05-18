@@ -29,7 +29,9 @@ class Neuron:
 
 class NeuralNetwork:
     def __init__(self, num_layers: int, layer_depths: list) -> None:
-        """_summary_
+        """The __init__ function of the NeuralNetwork class creates the network from the given dimensions
+           It creates all the neurons for a layer and handles the first layer as an input layer from then
+           on it creates neurons with the amount of weights as neurons in the previous layer.
 
         Args:
             num_layers (int): The amount of layers that need to be generated
@@ -50,7 +52,7 @@ class NeuralNetwork:
                 else: 
                     self.matrix[i].append(Neuron([random.uniform(-1, 1) for j in range(layer_depths[i-1])], random.uniform(-1, 1)))
         
-        [[print(neuron) for neuron in layer] and print() for layer in self.matrix]
+        [(print(f"Layer {index} with depth: {layer_depths[index]}:"), [print(neuron) for neuron in layer], print()) for index, layer in enumerate(self.matrix)]
 
 def main():
     random.seed(0)
