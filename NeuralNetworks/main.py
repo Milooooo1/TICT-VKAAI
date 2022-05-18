@@ -1,11 +1,17 @@
 import numpy as np
 import random
 
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
+
+def sigmoid_grad(x):
+    return np.exp(-x)/(np.exp(-x)+1)**2
 class Neuron:
     def __init__(self, weights, bias, less_than_or_equals = False):
         self.weights = weights
         self.bias = bias
         self.delta = 0
+        self.output = 0
         self.less_than_or_equals = less_than_or_equals
 
     def update(self, delta, bias, weights):
@@ -25,7 +31,7 @@ class Neuron:
 
     def __str__(self):
         '''Prints the number of weights and the bias'''
-        return f"Neuron Wn: {len(self.weights)} B: {self.bias}"
+        return f"Neuron Wn: {[round(weight, 2) for weight in self.weights]} B: {round(self.bias, 2)}"
 
 class NeuralNetwork:
     def __init__(self, num_layers: int, layer_depths: list) -> None:
@@ -48,11 +54,63 @@ class NeuralNetwork:
         for i in range(0, num_layers):
             for j in range(0, layer_depths[i]):
                 if i == 0:
-                    self.matrix[i].append(Neuron([random.uniform(-1, 1) for j in range(layer_depths[i])], random.uniform(-1, 1)))
+                    self.matrix[i].append(Neuron([0 for j in range(layer_depths[i])], 0))
                 else: 
                     self.matrix[i].append(Neuron([random.uniform(-1, 1) for j in range(layer_depths[i-1])], random.uniform(-1, 1)))
         
         [(print(f"Layer {index} with depth: {layer_depths[index]}:"), [print(neuron) for neuron in layer], print()) for index, layer in enumerate(self.matrix)]
+
+    def feedForward(self):
+        for index, layer in enumerate(self.matrix):
+            if index == 0:
+                continue #skip input layer
+            
+            for neuron in layer:
+                acc = 0
+                print(f"(1) zj = {round(neuron.bias, 2)} ", end="")
+                for depth, weight in enumerate(neuron.weights):
+                    acc += weight * self.matrix[index-1][depth].output
+                    print(f"+ ({round(weight, 2)} * {round(self.matrix[index-1][depth].output, 2)})", end=" ")
+                neuron.zj = neuron.bias + acc
+                neuron.output = sigmoid(neuron.zj)
+                print(f"= {round(neuron.bias + acc, 2)} || aj = {round(neuron.output, 2)}")
+            
+    def backPropagate(self, ground_truths):
+        # First calculate the output layer
+        print()
+        for neuron, ground_truth in zip(self.matrix[-1], ground_truths):
+            neuron.delta = sigmoid_grad(neuron.zj) * (ground_truth - neuron.output)
+            print(f"(2) D = {round(sigmoid(neuron.zj), 2)} * {round(ground_truth, 2)} - {round(neuron.output, 2)} = {round(neuron.delta, 2)}")
+        
+        # Backpropagate the previous layers
+        print()
+        tmp = len(self.matrix[1:-1])
+        for index, layer in reversed(list(enumerate(self.matrix[1:-1]))):
+            for neuron in layer:
+                acc = 0
+                print(f"(3) D = {round(sigmoid(neuron.zj), 2)} * ", end="")
+                for depth, weight in enumerate(neuron.weights):
+                    acc += weight * self.matrix[tmp-index-1][depth].delta 
+                    print(f"({round(weight, 2)} * {round(self.matrix[tmp-index-1][depth].delta, 2)})", end=" ")
+                    if depth != (len(neuron.weights)-1):
+                        print("+ ", end="")
+                neuron.delta = sigmoid_grad(neuron.zj) * acc
+                print(f"= {round(sigmoid_grad(neuron.zj),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
+
+        # pass
+    
+    def train(self, inputs, outputs, lr = 0.01):
+        
+        for input, neuron in zip(inputs, self.matrix[0]):
+            neuron.output = input    
+            
+        self.feedForward()
+        self.backPropagate(outputs)
+        # self.updateWeights()
+        
+        print()
+        for output, neuron in zip(outputs, self.matrix[1]):
+            print(f"Neuron output: {neuron.output} vs ground truth: {output}")
 
 def main():
     random.seed(0)
@@ -82,7 +140,8 @@ def main():
     #         carry = NAND_gate.classify([out1, out1])
     #         print(f"{x1}, {x2}, {carry}, {sum}")
 
-    NeuralNetwork(6, [2, 2, 3, 4, 2, 2])
+    nn = NeuralNetwork(3, [2, 2, 1])
+    nn.train([1, 0], [1])
 
 if __name__ == "__main__":
     main()
