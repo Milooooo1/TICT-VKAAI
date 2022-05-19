@@ -52,8 +52,6 @@ class NeuralNetwork:
                     self.matrix[i].append(Neuron([0 for j in range(layer_depths[i])], 0))
                 else: 
                     self.matrix[i].append(Neuron([random.uniform(-1, 1) for j in range(layer_depths[i-1])], random.uniform(-1, 1)))
-        
-        [(print(f"Layer {index} with depth: {layer_depths[index]}:"), [print(neuron) for neuron in layer], print()) for index, layer in enumerate(self.matrix)]
 
     def feedForward(self):
         for index, layer in enumerate(self.matrix):
@@ -92,13 +90,19 @@ class NeuralNetwork:
                 print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
     
     def updateWeights(self, learning_rate):
-        # Elke neuron heeft de gewichten van de vorige laag
-        # Begin achteraan en ga door de gewichten van die neuron.
-        # Update het gewicht met de lr * de delta van de bijbehorende neuron en * 
-        # de output van de neuron in de vorige laag met dezelfde diepte als het huidige gewicht
-        pass
+        print()
+        for index, layer in enumerate(reversed(self.matrix[1:])):
+            for neuron in layer:
+                for depth, weight in enumerate(neuron.weights):
+                    tmp = len(self.matrix) - 1
+                    print(f"(4) {round(weight,2)} += {learning_rate} * {round(neuron.delta, 2)} * {round(self.matrix[tmp-index-1][depth].output, 2)} = {round(neuron.weights[depth] + (learning_rate * neuron.delta * self.matrix[tmp-index-1][depth].output),2)}")     
+                    print(f"(4) {round(neuron.bias, 2)} += {learning_rate} * {round(neuron.delta, 2)} = {round(neuron.bias + (learning_rate * neuron.delta), 2)}")     
+                    neuron.weights[depth] += learning_rate * neuron.delta * self.matrix[tmp-index-1][depth].output
+                    neuron.bias += learning_rate * neuron.delta
     
     def train(self, inputs, outputs, lr = 0.01):
+        
+        self.print()
         
         for input, neuron in zip(inputs, self.matrix[0]):
             neuron.output = input    
@@ -108,8 +112,16 @@ class NeuralNetwork:
         self.updateWeights(lr)
         
         print()
-        for output, neuron in zip(outputs, self.matrix[1]):
+        [print(input, end=" ") for input in inputs]
+        print()
+        for output, neuron in zip(outputs, self.matrix[-1]):
             print(f"Neuron output: {neuron.output} vs ground truth: {output}")
+               
+        self.print()
+
+    def print(self):
+        print()
+        [(print(f"Layer {index} with depth: {len(self.matrix[index])}:"), [print(neuron) for neuron in layer], print()) for index, layer in enumerate(self.matrix[1:])]
 
 def main():
     random.seed(0)
@@ -140,7 +152,24 @@ def main():
     #         print(f"{x1}, {x2}, {carry}, {sum}")
 
     nn = NeuralNetwork(3, [2, 2, 1])
+    # nn.train([0, 0], [0])
     nn.train([1, 0], [1])
+    # nn.train([0, 1], [1])
+    # nn.train([1, 1], [0])
+    # nn.train([0, 0], [0])
+    # nn.train([1, 0], [1])
+    # nn.train([0, 1], [1])
+    # nn.train([1, 1], [0])
+    # nn.train([0, 0], [0])
+    # nn.train([1, 0], [1])
+    # nn.train([0, 1], [1])
+    # nn.train([1, 1], [0])
+    # nn.train([0, 0], [0])
+    # nn.train([1, 0], [1])
+    # nn.train([0, 1], [1])
+    # nn.train([1, 1], [0])
+            
+    
 
 if __name__ == "__main__":
     main()
