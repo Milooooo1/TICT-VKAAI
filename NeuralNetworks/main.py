@@ -60,64 +60,70 @@ class NeuralNetwork:
             
             for neuron in layer:
                 acc = 0
-                print(f"(1) zj = {round(neuron.bias, 2)} ", end="")
+                # print(f"(1) zj = {round(neuron.bias, 2)} ", end="")
                 for depth, weight in enumerate(neuron.weights):
                     acc += weight * self.matrix[index-1][depth].output
-                    print(f"+ ({round(weight, 2)} * {round(self.matrix[index-1][depth].output, 2)})", end=" ")
+                    # print(f"+ ({round(weight, 2)} * {round(self.matrix[index-1][depth].output, 2)})", end=" ")
                 neuron.sum = neuron.bias + acc
                 neuron.output = sigmoid(neuron.sum)
-                print(f"= {round(neuron.bias + acc, 2)} || aj = {round(neuron.output, 2)}")
+                # print(f"= {round(neuron.bias + acc, 2)} || aj = {round(neuron.output, 2)}")
             
     def backPropagate(self, ground_truths):
         # First calculate the output layer
-        print(f"\nDelta = r'(zi) * (ground truth - output)")
+        # print(f"\nDelta = r'(zi) * (ground truth - output)")
         for neuron, ground_truth in zip(self.matrix[-1], ground_truths):
             neuron.delta = sigmoid_grad(neuron.sum) * (ground_truth - neuron.output)
-            print(f"(2) D = {round(sigmoid_grad(neuron.sum), 2)} * {round(ground_truth, 2)} - {round(neuron.output, 2)} = {round(neuron.delta, 2)}")
+            # print(f"(2) D = {round(sigmoid_grad(neuron.sum), 2)} * {round(ground_truth, 2)} - {round(neuron.output, 2)} = {round(neuron.delta, 2)}")
         
         # Backpropagate the previous layers
-        print(f"\nDelta = r'(zi) * (deltaj * Weightij + ...)")
+        # print(f"\nDelta = r'(zi) * (deltaj * Weightij + ...)")
         for index, layer in enumerate(reversed((self.matrix[1:-1]))):
             for depth, neuron in enumerate(layer):
                 acc = 0
-                print(f"(3) D = {round(sigmoid_grad(neuron.sum), 2)} * ", end="")
+                # print(f"(3) D = {round(sigmoid_grad(neuron.sum), 2)} * ", end="")
                 for i, prevNeuron in enumerate(self.matrix[index-1]):
                     acc += prevNeuron.weights[depth] * prevNeuron.delta
-                    print(f"({round(prevNeuron.weights[depth], 2)} * {round(prevNeuron.delta, 2)})", end=" ")
-                    if i != len(self.matrix[index-1])-1:
-                        print(f"+", end=" ")
+                    # print(f"({round(prevNeuron.weights[depth], 2)} * {round(prevNeuron.delta, 2)})", end=" ")
+                    # if i != len(self.matrix[index-1])-1:
+                        # print(f"+", end=" ")
                 neuron.delta = sigmoid_grad(neuron.sum) * acc
-                print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
+                # print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
     
     def updateWeights(self, learning_rate):
-        print()
+        # print()
         for index, layer in enumerate(reversed(self.matrix[1:])):
             for neuron in layer:
                 for depth, weight in enumerate(neuron.weights):
                     tmp = len(self.matrix) - 1
-                    print(f"(4) {round(weight,2)} += {learning_rate} * {round(neuron.delta, 2)} * {round(self.matrix[tmp-index-1][depth].output, 2)} = {round(neuron.weights[depth] + (learning_rate * neuron.delta * self.matrix[tmp-index-1][depth].output),2)}")     
-                    print(f"(4) {round(neuron.bias, 2)} += {learning_rate} * {round(neuron.delta, 2)} = {round(neuron.bias + (learning_rate * neuron.delta), 2)}")     
+                    # print(f"(4) {round(weight,2)} += {learning_rate} * {round(neuron.delta, 2)} * {round(self.matrix[tmp-index-1][depth].output, 2)} = {round(neuron.weights[depth] + (learning_rate * neuron.delta * self.matrix[tmp-index-1][depth].output),2)}")     
+                    # print(f"(4) {round(neuron.bias, 2)} += {learning_rate} * {round(neuron.delta, 2)} = {round(neuron.bias + (learning_rate * neuron.delta), 2)}")     
                     neuron.weights[depth] += learning_rate * neuron.delta * self.matrix[tmp-index-1][depth].output
                     neuron.bias += learning_rate * neuron.delta
     
-    def train(self, inputs, outputs, lr = 0.01):
+    def train(self, inputs, outputs, epochs = 1, lr = 0.01):
         
-        self.print()
-        
-        for input, neuron in zip(inputs, self.matrix[0]):
-            neuron.output = input    
-            
-        self.feedForward()
-        self.backPropagate(outputs)
-        self.updateWeights(lr)
-        
-        print()
-        [print(input, end=" ") for input in inputs]
-        print()
-        for output, neuron in zip(outputs, self.matrix[-1]):
-            print(f"Neuron output: {neuron.output} vs ground truth: {output}")
-               
-        self.print()
+        for epoch in range(0, epochs):
+            correct_ctr = 0
+            for index, data_point in enumerate(inputs):
+                # self.print()
+                
+                for input, neuron in zip(data_point, self.matrix[0]):
+                    neuron.output = input    
+                    
+                self.feedForward()
+                self.backPropagate(outputs[index])
+                self.updateWeights(lr)
+                
+                # print()
+                # [print(input, end=" ") for input in inputs]
+                # print()
+                for output, neuron in zip(outputs[index], self.matrix[-1]):
+                    # print(f"Neuron output: {neuron.output} vs ground truth: {output}")
+                    if (round(neuron.output) == output): 
+                        correct_ctr+=1
+                    
+                # self.print()
+            print(f"Epoch: {epoch} Network had {correct_ctr} out of {len(inputs)} correct, accuracy of: {(correct_ctr / len(inputs)*100)}%")
 
     def print(self):
         print()
@@ -125,49 +131,17 @@ class NeuralNetwork:
 
 def main():
     random.seed(0)
-
-    # NOR_gate = Neuron([0.5, 0.5], 0.33, True)
-    # print("NOR gate:")
-    # for x1 in range(0,2):
-    #     for x2 in range(0,2):
-    #         print(f"{x1}, {x2}: {NOR_gate.classify([x1, x2])}")
-
-    # OR_gate = Neuron([0.5, 0.5], 0.33, False)
-    # NAND_gate = Neuron([0.5, 0.5], 0.66, True)
-    # AND_gate = Neuron([0.5, 0.5], 0.66, False)
-
-    # print("\nXOR gate:")
-    # for x1 in range(0,2):
-    #     for x2 in range(0,2):
-    #         print(f"{x1}, {x2}, {AND_gate.classify([OR_gate.classify([x1, x2]), NAND_gate.classify([x1, x2])])}")
     
-    # print("\nADDER gate:")
-    # for x1 in range(0,2):
-    #     for x2 in range(0,2):
-    #         out1  = NAND_gate.classify([x1, x2])
-    #         out2  = NAND_gate.classify([x1, out1])
-    #         out3  = NAND_gate.classify([out1, x2])
-    #         sum   = NAND_gate.classify([out2, out3])
-    #         carry = NAND_gate.classify([out1, out1])
-    #         print(f"{x1}, {x2}, {carry}, {sum}")
-
     nn = NeuralNetwork(3, [2, 2, 1])
-    # nn.train([0, 0], [0])
-    nn.train([1, 0], [1])
-    # nn.train([0, 1], [1])
-    # nn.train([1, 1], [0])
-    # nn.train([0, 0], [0])
-    # nn.train([1, 0], [1])
-    # nn.train([0, 1], [1])
-    # nn.train([1, 1], [0])
-    # nn.train([0, 0], [0])
-    # nn.train([1, 0], [1])
-    # nn.train([0, 1], [1])
-    # nn.train([1, 1], [0])
-    # nn.train([0, 0], [0])
-    # nn.train([1, 0], [1])
-    # nn.train([0, 1], [1])
-    # nn.train([1, 1], [0])
+    inputs = [[0,0],
+              [1,0],
+              [0,1],
+              [1,1]]
+    outputs = [[0], 
+               [1], 
+               [1], 
+               [0]]
+    nn.train(inputs, outputs, 100, 0.001)
             
     
 
