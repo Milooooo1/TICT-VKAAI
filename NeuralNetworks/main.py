@@ -86,16 +86,14 @@ class NeuralNetwork:
         ## TODO: I THINK I AM USING THE WRONG DELTAS AND WEIGHTS
         print(f"\nDelta = r'(zi) * (deltaj * Weightij + ...)")
         for index, layer in enumerate(reversed((self.matrix[1:-1]))):
-            tmp = len(self.matrix) - 1
-            print(tmp)
-            for neuron in layer:
+            for depth, neuron in enumerate(layer):
                 acc = 0
-                print(f"(3) D = {round(sigmoid(neuron.sum), 2)} * ", end="")
-                for depth, weight in enumerate(neuron.weights):
-                    acc += weight * self.matrix[tmp - index][depth].delta 
-                    print(f"({round(weight, 2)} * {round(self.matrix[tmp - index][depth].delta, 2)})", end=" ")
-                    if depth != (len(neuron.weights)-1):
-                        print("+ ", end="")
+                print(f"(3) D = {round(sigmoid_grad(neuron.sum), 2)} * ", end="")
+                for i, prevNeuron in enumerate(self.matrix[index-1]):
+                    acc += prevNeuron.weights[depth] * prevNeuron.delta
+                    print(f"({round(prevNeuron.weights[depth], 2)} * {round(prevNeuron.delta, 2)})", end=" ")
+                    if i != len(self.matrix[index-1])-1:
+                        print(f"+", end=" ")
                 neuron.delta = sigmoid_grad(neuron.sum) * acc
                 print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
     
