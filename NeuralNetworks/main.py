@@ -14,11 +14,6 @@ class Neuron:
         self.output = 0
         self.less_than_or_equals = less_than_or_equals
 
-    def update(self, delta, bias, weights):
-        self.bias = bias
-        self.delta = delta
-        self.weights = weights
-
     def classify(self, inputs):
         sum = 0
         for weight, input in zip(self.weights, inputs):
@@ -96,6 +91,13 @@ class NeuralNetwork:
                 neuron.delta = sigmoid_grad(neuron.sum) * acc
                 print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
     
+    def updateWeights(self, learning_rate):
+        # Elke neuron heeft de gewichten van de vorige laag
+        # Begin achteraan en ga door de gewichten van die neuron.
+        # Update het gewicht met de lr * de delta van de bijbehorende neuron en * 
+        # de output van de neuron in de vorige laag met dezelfde diepte als het huidige gewicht
+        pass
+    
     def train(self, inputs, outputs, lr = 0.01):
         
         for input, neuron in zip(inputs, self.matrix[0]):
@@ -103,7 +105,7 @@ class NeuralNetwork:
             
         self.feedForward()
         self.backPropagate(outputs)
-        # self.updateWeights()
+        self.updateWeights(lr)
         
         print()
         for output, neuron in zip(outputs, self.matrix[1]):
