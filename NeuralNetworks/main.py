@@ -102,7 +102,7 @@ class NeuralNetwork:
     
     def train(self, inputs, outputs, epochs = 1, lr = 0.01):
         
-        for epoch in range(0, epochs):
+        for epoch in range(1, epochs+1):
             correct_ctr = 0
             for index, data_point in enumerate(inputs):
                 # self.print()
@@ -123,7 +123,7 @@ class NeuralNetwork:
                         correct_ctr+=1
                     
                 # self.print()
-            print(f"Epoch: {epoch} Network had {correct_ctr} out of {len(inputs)} correct, accuracy of: {(correct_ctr / len(inputs)*100)}%")
+            print(f"Epoch: {epoch}/{epochs} Network had {correct_ctr} out of {len(inputs)} correct, accuracy of: {(correct_ctr / len(inputs)*100)}% | [{round((epoch/epochs)*100,2)}%] completed" , end="\r")
 
     def print(self):
         print()
@@ -141,9 +141,9 @@ def main():
                [1], 
                [1], 
                [0]]
-    nn.train(inputs, outputs, 100, 0.001)
-            
+    nn.train(inputs, outputs, 50000, 0.01)
     
 
 if __name__ == "__main__":
     main()
+    print()
