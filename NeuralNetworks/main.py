@@ -71,32 +71,33 @@ class NeuralNetwork:
                 for depth, weight in enumerate(neuron.weights):
                     acc += weight * self.matrix[index-1][depth].output
                     print(f"+ ({round(weight, 2)} * {round(self.matrix[index-1][depth].output, 2)})", end=" ")
-                neuron.zj = neuron.bias + acc
-                neuron.output = sigmoid(neuron.zj)
+                neuron.sum = neuron.bias + acc
+                neuron.output = sigmoid(neuron.sum)
                 print(f"= {round(neuron.bias + acc, 2)} || aj = {round(neuron.output, 2)}")
             
     def backPropagate(self, ground_truths):
         # First calculate the output layer
-        print()
+        print(f"\nDelta = r'(zi) * (ground truth - output)")
         for neuron, ground_truth in zip(self.matrix[-1], ground_truths):
-            neuron.delta = sigmoid_grad(neuron.zj) * (ground_truth - neuron.output)
-            print(f"(2) D = {round(sigmoid(neuron.zj), 2)} * {round(ground_truth, 2)} - {round(neuron.output, 2)} = {round(neuron.delta, 2)}")
+            neuron.delta = sigmoid_grad(neuron.sum) * (ground_truth - neuron.output)
+            print(f"(2) D = {round(sigmoid_grad(neuron.sum), 2)} * {round(ground_truth, 2)} - {round(neuron.output, 2)} = {round(neuron.delta, 2)}")
         
         # Backpropagate the previous layers
         ## TODO: I THINK I AM USING THE WRONG DELTAS AND WEIGHTS
-        print()
-        tmp = len(self.matrix[1:-1])
-        for index, layer in reversed(list(enumerate(self.matrix[1:-1]))):
+        print(f"\nDelta = r'(zi) * (deltaj * Weightij + ...)")
+        for index, layer in enumerate(reversed((self.matrix[1:-1]))):
+            tmp = len(self.matrix) - 1
+            print(tmp)
             for neuron in layer:
                 acc = 0
-                print(f"(3) D = {round(sigmoid(neuron.zj), 2)} * ", end="")
+                print(f"(3) D = {round(sigmoid(neuron.sum), 2)} * ", end="")
                 for depth, weight in enumerate(neuron.weights):
-                    acc += weight * self.matrix[tmp-index-1][depth].delta 
-                    print(f"({round(weight, 2)} * {round(self.matrix[tmp-index-1][depth].delta, 2)})", end=" ")
+                    acc += weight * self.matrix[tmp - index][depth].delta 
+                    print(f"({round(weight, 2)} * {round(self.matrix[tmp - index][depth].delta, 2)})", end=" ")
                     if depth != (len(neuron.weights)-1):
                         print("+ ", end="")
-                neuron.delta = sigmoid_grad(neuron.zj) * acc
-                print(f"= {round(sigmoid_grad(neuron.zj),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
+                neuron.delta = sigmoid_grad(neuron.sum) * acc
+                print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
     
     def train(self, inputs, outputs, lr = 0.01):
         
