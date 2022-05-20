@@ -104,6 +104,7 @@ class NeuralNetwork:
         
         for epoch in range(1, epochs+1):
             correct_ctr = 0
+            loss = 0
             for index, data_point in enumerate(inputs):
                 # self.print()
                 
@@ -119,11 +120,12 @@ class NeuralNetwork:
                 # print()
                 for output, neuron in zip(outputs[index], self.matrix[-1]):
                     # print(f"Neuron output: {neuron.output} vs ground truth: {output}")
+                    loss += (output - neuron.output)
                     if (round(neuron.output) == output): 
                         correct_ctr+=1
                     
                 # self.print()
-            print(f"Epoch: {epoch}/{epochs} Network had {correct_ctr} out of {len(inputs)} correct, accuracy of: {(correct_ctr / len(inputs)*100)}% | [{round((epoch/epochs)*100,2)}%] completed" , end="\r")
+            print(f"Epoch: {epoch}/{epochs} | Network had {correct_ctr} out of {len(inputs)} correct | accuracy of: {(correct_ctr / len(inputs)*100)}% | loss: {round(loss/len(inputs), 8)} | [{round((epoch/epochs)*100,2)}%] completed      " , end="\r")
 
     def print(self):
         print()
@@ -141,7 +143,7 @@ def main():
                [1], 
                [1], 
                [0]]
-    nn.train(inputs, outputs, 50000, 0.01)
+    nn.train(inputs, outputs, 40000, 0.01)
     
 
 if __name__ == "__main__":
