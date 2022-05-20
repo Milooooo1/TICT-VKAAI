@@ -6,6 +6,7 @@ def sigmoid(x):
 
 def sigmoid_grad(x):
     return np.exp(-x)/(np.exp(-x)+1)**2
+
 class Neuron:
     def __init__(self, weights, bias, less_than_or_equals = False):
         self.weights = weights
@@ -13,16 +14,6 @@ class Neuron:
         self.delta = 0
         self.output = 0
         self.less_than_or_equals = less_than_or_equals
-
-    def classify(self, inputs):
-        sum = 0
-        for weight, input in zip(self.weights, inputs):
-            sum += input * weight
-
-        if self.less_than_or_equals:
-            return 1 if sum <= self.bias else 0
-        else:
-            return 1 if sum >= self.bias else 0
 
     def __str__(self):
         '''Prints the number of weights and the bias'''
@@ -54,6 +45,8 @@ class NeuralNetwork:
                     self.matrix[i].append(Neuron([random.uniform(-1, 1) for j in range(layer_depths[i-1])], random.uniform(-1, 1)))
 
     def feedForward(self):
+        """_summary_
+        """
         for index, layer in enumerate(self.matrix):
             if index == 0:
                 continue #skip input layer
@@ -68,7 +61,12 @@ class NeuralNetwork:
                 neuron.output = sigmoid(neuron.sum)
                 # print(f"= {round(neuron.bias + acc, 2)} || aj = {round(neuron.output, 2)}")
             
-    def backPropagate(self, ground_truths):
+    def backPropagate(self, ground_truths: list):
+        """_summary_
+
+        Args:
+            ground_truths (_type_): _description_
+        """
         # First calculate the output layer
         # print(f"\nDelta = r'(zi) * (ground truth - output)")
         for neuron, ground_truth in zip(self.matrix[-1], ground_truths):
@@ -89,7 +87,12 @@ class NeuralNetwork:
                 neuron.delta = sigmoid_grad(neuron.sum) * acc
                 # print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
     
-    def updateWeights(self, learning_rate):
+    def updateWeights(self, learning_rate: int):
+        """_summary_
+
+        Args:
+            learning_rate (_type_): _description_
+        """
         # print()
         for index, layer in enumerate(reversed(self.matrix[1:])):
             for neuron in layer:
@@ -100,7 +103,15 @@ class NeuralNetwork:
                     neuron.weights[depth] += learning_rate * neuron.delta * self.matrix[tmp-index-1][depth].output
                     neuron.bias += learning_rate * neuron.delta
     
-    def train(self, inputs, outputs, epochs = 1, lr = 0.01):
+    def train(self, inputs: list, outputs: list, epochs: int = 1, lr: int = 0.01):
+        """_summary_
+
+        Args:
+            inputs (_type_): _description_
+            outputs (_type_): _description_
+            epochs (int, optional): _description_. Defaults to 1.
+            lr (float, optional): _description_. Defaults to 0.01.
+        """
         
         for epoch in range(1, epochs+1):
             correct_ctr = 0
@@ -134,7 +145,7 @@ class NeuralNetwork:
 def main():
     random.seed(0)
     
-    nn = NeuralNetwork(3, [2, 2, 1])
+    xor_network = NeuralNetwork(3, [2, 2, 1])
     inputs = [[0,0],
               [1,0],
               [0,1],
@@ -143,7 +154,11 @@ def main():
                [1], 
                [1], 
                [0]]
-    nn.train(inputs, outputs, 40000, 0.01)
+    xor_network.train(inputs, outputs, 40000, 0.01)
+
+
+    iris_network = NeuralNetwork(4, [5, 5, 3, 3])
+
     
 
 if __name__ == "__main__":
