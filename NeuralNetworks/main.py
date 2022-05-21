@@ -1,5 +1,7 @@
 import numpy as np
 import random
+from sklearn.utils import shuffle
+import csv
 
 def sigmoid(x):
     return 1/(1+np.exp(-x))
@@ -120,23 +122,25 @@ class NeuralNetwork:
                 # self.print()
                 
                 for input, neuron in zip(data_point, self.matrix[0]):
-                    neuron.output = input    
+                    neuron.output = float(input)    
                     
                 self.feedForward()
                 self.backPropagate(outputs[index])
                 self.updateWeights(lr)
                 
-                # print()
-                # [print(input, end=" ") for input in inputs]
-                # print()
+                # print(outputs[index].index(max(outputs[index])))
+                network_outputs = [neuron.output for neuron in self.matrix[-1]]
+                # print(network_outputs.index(max(network_outputs)))
+                if outputs[index].index(max(outputs[index])) == network_outputs.index(max(network_outputs)):
+                    correct_ctr += 1
                 for output, neuron in zip(outputs[index], self.matrix[-1]):
                     # print(f"Neuron output: {neuron.output} vs ground truth: {output}")
                     loss += (output - neuron.output)
-                    if (round(neuron.output) == output): 
-                        correct_ctr+=1
+                    # if (round(neuron.output) == output): 
+                        # correct_ctr+=1
                     
                 # self.print()
-            print(f"Epoch: {epoch}/{epochs} | Network had {correct_ctr} out of {len(inputs)} correct | accuracy of: {(correct_ctr / len(inputs)*100)}% | loss: {round(loss/len(inputs), 8)} | [{round((epoch/epochs)*100,2)}%] completed      " , end="\r")
+            print(f"Epoch: {epoch}/{epochs} | {round(correct_ctr)}/{len(inputs)} correct | accuracy of: {round((correct_ctr) / len(inputs)*100)}% | loss: {round(loss/len(inputs), 8)} | [{round((epoch/epochs)*100,2)}%] completed      " , end="\r")
 
     def print(self):
         print()
@@ -154,11 +158,27 @@ def main():
                [1], 
                [1], 
                [0]]
-    xor_network.train(inputs, outputs, 40000, 0.01)
+    
+    print("XOR Network:")
+    xor_network.train(inputs, outputs, 36376, 0.01)
+    print()
 
-
+    data = []
+    labels = []
+    with open('/home/milo/TICT-VKAAI/NeuralNetworks/iris.data', newline='') as csvfile:
+        spamreader = np.array(list(csv.reader(csvfile, delimiter=',', quotechar='|')))
+        data = spamreader[:, :-1]
+        named_labels = spamreader[:, -1:]
+        
+        data, named_labels = shuffle(data, named_labels)
+        for label in named_labels:
+            if label == 'Iris-setosa': labels.append([1,0,0])
+            elif label == 'Iris-versicolor': labels.append([0,1,0])
+            elif label == 'Iris-virginica': labels.append([0,0,1])
+        
+    print("Iris Network:")
     iris_network = NeuralNetwork(4, [5, 5, 3, 3])
-
+    iris_network.train(data[:100], labels[:100], 10000, 0.01)
     
 
 if __name__ == "__main__":
