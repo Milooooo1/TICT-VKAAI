@@ -47,7 +47,7 @@ class NeuralNetwork:
                     self.matrix[i].append(Neuron([random.uniform(-1, 1) for j in range(layer_depths[i-1])], random.uniform(-1, 1)))
 
     def feedForward(self):
-        """_summary_
+        """calculate the outputs of all the neurons in the network.
         """
         for index, layer in enumerate(self.matrix):
             if index == 0:
@@ -64,10 +64,10 @@ class NeuralNetwork:
                 # print(f"= {round(neuron.bias + acc, 2)} || aj = {round(neuron.output, 2)}")
             
     def backPropagate(self, ground_truths: list):
-        """_summary_
+        """calculate all the delta's for the whole network.
 
         Args:
-            ground_truths (_type_): _description_
+            ground_truths (list): the known outputs that the network needs to match
         """
         # First calculate the output layer
         # print(f"\nDelta = r'(zi) * (ground truth - output)")
@@ -90,10 +90,12 @@ class NeuralNetwork:
                 # print(f"= {round(sigmoid_grad(neuron.sum),2)} * {round(acc,2)} = {round(neuron.delta,2)}")
     
     def updateWeights(self, learning_rate: int):
-        """_summary_
+        """Update the weights and biases of each neuron.
 
         Args:
-            learning_rate (_type_): _description_
+            learning_rate (int): How fast the network should learn, bigger learning rate is faster
+                                 but can cause a less effective network. A lower learning rate is slower
+                                 and results in a better network but can stop to early if its stuck.
         """
         # print()
         for index, layer in enumerate(reversed(self.matrix[1:])):
@@ -180,6 +182,7 @@ def main():
     iris_network = NeuralNetwork(4, [5, 5, 3, 3])
     iris_network.train(data[:100], labels[:100], 10000, 0.01)
     
+    # TODO: Go through test set and measure accuracy
 
 if __name__ == "__main__":
     main()
