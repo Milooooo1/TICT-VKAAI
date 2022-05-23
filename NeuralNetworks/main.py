@@ -11,12 +11,11 @@ def sigmoid_grad(x):
     return np.exp(-x)/(np.exp(-x)+1)**2
 
 class Neuron:
-    def __init__(self, weights, bias, less_than_or_equals = False):
+    def __init__(self, weights, bias):
         self.weights = weights
         self.bias = bias
         self.delta = 0
         self.output = 0
-        self.less_than_or_equals = less_than_or_equals
 
     def __str__(self):
         '''Prints the number of weights and the bias'''
@@ -236,4 +235,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print()
