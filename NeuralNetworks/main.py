@@ -1,6 +1,7 @@
 import numpy as np
 import random
 from sklearn.utils import shuffle
+from tqdm import tqdm
 import csv
 
 def sigmoid(x):
@@ -108,13 +109,18 @@ class NeuralNetwork:
                     neuron.bias += learning_rate * neuron.delta
     
     def train(self, inputs: list, outputs: list, epochs: int = 1, lr: int = 0.01):
-        """_summary_
+        """The train function trains the network by iterating over the dataset and calling
+           all the specific calculation functions. It also keeps track of the accuracy. 
 
         Args:
-            inputs (_type_): _description_
-            outputs (_type_): _description_
-            epochs (int, optional): _description_. Defaults to 1.
-            lr (float, optional): _description_. Defaults to 0.01.
+            inputs (list): list of all input parameters
+            outputs (list): list of expected outputs
+            epochs (int, optional): the amount of times the 
+                                    train function should iterate
+                                    over the dataset. Defaults to 1.
+            lr (float, optional): how fast the AI should learn, 
+                                  bigger is faster but not always better. 
+                                  Defaults to 0.01.
         """
         
         for epoch in range(1, epochs+1):
@@ -143,27 +149,71 @@ class NeuralNetwork:
                     
                 # self.print()
             print(f"Epoch: {epoch}/{epochs} | {round(correct_ctr)}/{len(inputs)} correct | accuracy of: {round((correct_ctr) / len(inputs)*100)}% | loss: {round(loss/len(inputs), 8)} | [{round((epoch/epochs)*100,2)}%] completed      " , end="\r")
+        print()
+
+    def test(self, inputs: list, outputs: list):
+        """The test function goes through the list of inputs and forwards the inputs
+           to measure the accuracy the outputs after forwarding are compared to the ground truths
+
+        Args:
+            inputs (list): list of all input parameters
+            outputs (list): list of expected outputs
+        """
+        correct_ctr = 0
+        for index, input in tqdm(enumerate(inputs), desc="Testing network"):
+
+            for input, neuron in zip(input, self.matrix[0]):
+                neuron.output = float(input)
+
+            self.feedForward()
+
+            network_outputs = [neuron.output for neuron in self.matrix[-1]]
+            if outputs[index].index(max(outputs[index])) == network_outputs.index(max(network_outputs)):
+                correct_ctr += 1   
+        
+        print(f"Accuracy: {round((correct_ctr/len(outputs))*100)}") 
+
+    def classify(self, input: list):
+        """The classify function classifies a single input and returns the estimated output 
+
+        Args:
+            input (list): list of all the inputs, 
+                          must be same dimensions as input layer
+
+        Returns:
+            estimated outputs: list of all the estimated outputs
+        """
+        for input, neuron in zip(input, self.matrix[0]):
+                neuron.output = float(input)
+        self.feedForward()
+        return [neuron.output for neuron in self.matrix[-1]]
+
+
+    def __str__(self):
+        return [(f"Layer {index} with depth: {len(self.matrix[index])}:", [str(neuron) for neuron in layer]) for index, layer in enumerate(self.matrix[1:])]
 
     def print(self):
-        print()
-        [(print(f"Layer {index} with depth: {len(self.matrix[index])}:"), [print(neuron) for neuron in layer], print()) for index, layer in enumerate(self.matrix[1:])]
+        [(print(layer_depth), [print(neuron) for neuron in neurons], print()) for layer_depth, neurons in self.__str__()]
+
 
 def main():
     random.seed(0)
     
-    xor_network = NeuralNetwork(3, [2, 2, 1])
+    # The xor network has two outputs for each state, 1 or 0 
+    # my accuracy detection is not smart so you need a output neuron for every possible state
+    xor_network = NeuralNetwork(3, [2, 2, 2])
     inputs = [[0,0],
               [1,0],
               [0,1],
               [1,1]]
-    outputs = [[0], 
-               [1], 
-               [1], 
-               [0]]
+    outputs = [[1, 0], 
+               [0, 1], 
+               [0, 1], 
+               [1, 0]]
     
     print("XOR Network:")
-    xor_network.train(inputs, outputs, 36376, 0.01)
-    print()
+    xor_network.train(inputs, outputs, 9000, 0.05)
+    xor_network.test(inputs, outputs)
 
     data = []
     labels = []
@@ -178,11 +228,11 @@ def main():
             elif label == 'Iris-versicolor': labels.append([0,1,0])
             elif label == 'Iris-virginica': labels.append([0,0,1])
         
-    print("Iris Network:")
+    print("\nIris Network:")
     iris_network = NeuralNetwork(4, [5, 5, 3, 3])
-    iris_network.train(data[:100], labels[:100], 10000, 0.01)
+    iris_network.train(data[:100], labels[:100], 9000, 0.01)
+    iris_network.test(data[100:], labels[100:])
     
-    # TODO: Go through test set and measure accuracy
 
 if __name__ == "__main__":
     main()
