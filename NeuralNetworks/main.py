@@ -228,8 +228,8 @@ def main():
             elif label == 'Iris-virginica': labels.append([0,0,1])
         
     print("\nIris Network:")
-    iris_network = NeuralNetwork(4, [5, 5, 3, 3])
-    iris_network.train(data[:100], labels[:100], 9000, 0.01)
+    iris_network = NeuralNetwork(3, [4, 2, 3])
+    iris_network.train(data[:100], labels[:100], 3000, 0.01)
     iris_network.test(data[100:], labels[100:])
     
 
