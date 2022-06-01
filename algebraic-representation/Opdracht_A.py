@@ -102,7 +102,9 @@ Opdracht A2:
 Verklaar met kleine berekeningen het aantal parameters dat bij elke laag
 staat genoemd in bovenstaande model summary.
 
-Params input laag + params laag 1 + params laag 2 + ... + params output laag = totaal aantal params
+(28 * 28 + 1) * 64 = 50240
+(64 + 1)      * 32 = 2080
+(32 + 1)      * 10 = 330
 """
 
 """
