@@ -125,7 +125,7 @@ conv2d (Conv2D)                 (None, 24, 24, 20)       520
     
     Aantal params = (5 * 5 + 1) * 20 = 520 
     Aantal * operaties = 24 * (5 * 5) = 600 * 20 = 12000
-    Aantal + operaties = 24 * (5 * 5 - 5) = 480 * 20 = 9600
+    Aantal + operaties = 24 * (5 * 5 - 1) = 576 * 20 = 11520
 
 max_pooling2d (MaxPooling2D)    (None, 12, 12, 20)       0 
     Max pooling met kernel 2 deelt de shape door twee dus vandaar 24 naar 12 vinden
@@ -139,7 +139,7 @@ conv2d_1 (Conv2D)               (None, 10, 10, 20)       3620
     
     Aantal params = (3 * 3 * 20 + 1) * 20 = 3620
     Aantal * operaties = 10 * (3 * 3) = 90 * 20 = 1800
-    Aantal + operaties = 10 * (3 * 3 - 3) = 60 * 20 = 1200
+    Aantal + operaties = 10 * (3 * 3 - 1) = 80 * 20 = 1600
     
 max_pooling2d_1 (MaxPooling     (None, 5, 5, 20)         0
     Max pooling met kernel 2 deelt de shape door twee dus vandaar 10 naar 5 vinden
@@ -154,7 +154,7 @@ conv2d_2 (Conv2D)               (None, 1, 1, 10)          5010
     
     Aantal params = (5 * 5 * 20 + 1) * 10 = 5010
     Aantal * operaties = 1 * (5 * 5) = 25 * 20 = 500
-    Aantal * operaties = 1 * (5 * 5 - 5) = 20 * 20 = 400
+    Aantal * operaties = 1 * (5 * 5 - 1) = 24 * 20 = 480
 
 
 """

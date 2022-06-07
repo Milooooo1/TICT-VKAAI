@@ -121,21 +121,21 @@ Opdracht D3:
 
 Layer 1
 Aantal * operaties: 1020 * ( 5 * 5 ) = 25500 * 20 = 510000
-Aantal + operaties: 1020 * ( 5 * 5 - 5) = 20400 * 20 = 408000
+Aantal + operaties: 1020 * ( 5 * 5 - 1) = 24480 * 20 = 489600
 
 Layer 2
 Aantal * operaties: 508 * ( 3 * 3 ) = 4572 * 20 = 91440
-Aantal + operaties: 508 * ( 3 * 3 - 3) = 3048 * 20 = 60960
+Aantal + operaties: 508 * ( 3 * 3 - 1) = 4046 * 20 = 81280
 
 Layer 3
 Aantal * operaties: 250 * ( 5 * 5 ) = 6250 * 10 = 62500
-Aantal + operaties: 250 * ( 5 * 5 - 5) = 5000 * 10 = 50000
+Aantal + operaties: 250 * ( 5 * 5 - 1) = 6000 * 10 = 60000
 
 Totaal = 1182900
 1 FLOP = floating point operation per second
 1 float == 4 bytes
-1182900 * 4 = 4731600 bytes
-4731600 / 1.000.000.000.000 = 0,0000047316 seconden == 4.7 microseconden
+1294820 * 4 = 5179280 bytes
+5179280 / 1.000.000.000.000 = 0,0000051792 seconden == 5.2 microseconden
 
 In werkelijkheid zal dit langer duren door vertraging van de verschillende abstractie lagen in het OS 
 maar ook het ophalen en opslaan van de data in het cache geheugen dit is allemaal heel snel maar zorgt
