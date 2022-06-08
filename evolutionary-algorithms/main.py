@@ -73,7 +73,7 @@ def calculateWorth(table, knightsDict):
         
         l_aff = knightsDict[knight][l_neighbor] * knightsDict[l_neighbor][knight]
         r_aff = knightsDict[knight][r_neighbor] * knightsDict[r_neighbor][knight]
-        totalAffinity += (l_aff + r_aff)
+        totalAffinity += (l_aff + r_aff) / 2
     return totalAffinity
 
 def main():
@@ -150,8 +150,19 @@ def main():
     print("Plot saved")
 
     affinities.sort(key=lambda x: x[0])
-    print(f"Best affinity = {round(affinities[-1][0], 2)}, : {affinities[-1][1]}")
+    best = affinities[-1]
+    print(f"Best affinity = {round(best[0], 2)}, : {best[1]}")
     
+    
+    first = best[1][0]
+    last = best[1][-1]
+    print(f"({knightsDict[last][first]}x{knightsDict[first][last]}) {first}", end=" ")
+    for index in range(0, len(best[1])-1):
+        knight = best[1][index]
+        r_neighbor = best[1][index+1]
+        print(f"({knightsDict[knight][r_neighbor]}x{knightsDict[r_neighbor][knight]}) {r_neighbor}", end=" ")
+
+    print()
 
 
 if __name__ == "__main__":
