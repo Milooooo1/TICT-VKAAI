@@ -3,7 +3,6 @@ from tqdm import tqdm
 import csv
 import random
 import copy
-import argparse
 
 def mutate(table):
     """The mutate function takes a table order and applies
