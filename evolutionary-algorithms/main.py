@@ -6,6 +6,15 @@ import copy
 import argparse
 
 def mutate(table):
+    """The mutate function takes a table order and applies
+       a single mutation. We swap two people at the table.
+
+    Args:
+        table (list): table order to mutate
+
+    Returns:
+        list: new mutated child
+    """
     new_table = copy.deepcopy(table)
     for _ in range(1):
         random_index1 = random.randint(0, len(new_table)-1)
@@ -19,6 +28,18 @@ def mutate(table):
     return new_table
 
 def crossover(eliteParent, randomParent):
+    """The crossover functions takes two table order, one with a good affinity
+       and one with a random affinity. A new child is created with a subsection 
+       of the eliteParent appended with the remaining items in randomParent
+
+    Args:
+        eliteParent (list): good affinity table order
+        randomParent (list): random table order
+
+    Returns:
+        list: new child with subsection of eliteParent appended 
+              with the remaining items in randomParent
+    """
     start = random.randint(2, len(eliteParent)-6)
     end = random.randint(4, len(eliteParent)-4)
     while end < start:
@@ -31,14 +52,24 @@ def crossover(eliteParent, randomParent):
     
     return child
 
-def calculateWorth(population, knightsDict):
+def calculateWorth(table, knightsDict):
+    """The calculateWorth function calculates the total affinity
+       of a single table order. 
+
+    Args:
+        table (list): table order to calculate affinity
+        knightsDict (dict): look up dict to find the affinities in
+
+    Returns:
+        int: total affinity of table order
+    """
     totalAffinity = 0
-    for index, knight in enumerate(population):
-        l_neighbor = population[index - 1]
-        if index == len(population)-1:
-            r_neighbor = population[0]
+    for index, knight in enumerate(table):
+        l_neighbor = table[index - 1]
+        if index == len(table)-1:
+            r_neighbor = table[0]
         else: 
-            r_neighbor = population[index + 1]
+            r_neighbor = table[index + 1]
         
         l_aff = knightsDict[knight][l_neighbor] * knightsDict[l_neighbor][knight]
         r_aff = knightsDict[knight][r_neighbor] * knightsDict[r_neighbor][knight]
@@ -50,12 +81,14 @@ def main():
     
     knightsDict = {}
     names = []
-    epochs = 500
-    num_pop = 100
-    num_elite = int(0.1 * num_pop)
-    num_randoms = int(0.2 * num_pop)
+    
+    # Tweak parameters
+    epochs = 100
+    num_pop = 500
+    num_elite = int(0.05 * num_pop)
+    num_randoms = int(0.35 * num_pop)
     num_mutations = int(0.3 * num_pop)
-    num_crossovers = int(0.4 * num_pop)
+    num_crossovers = int(0.3 * num_pop)
     
     # Load all the data
     with open('RondeTafel.csv', 'r', newline='') as csvfile:
@@ -117,7 +150,7 @@ def main():
     print("Plot saved")
 
     affinities.sort(key=lambda x: x[0])
-    print(f"Best affinity = {affinities[-1]}")
+    print(f"Best affinity = {round(affinities[-1][0], 2)}, : {affinities[-1][1]}")
     
 
 
